@@ -60,8 +60,9 @@ public:
     void shutdown() {
         _running = false;
         _cv.notify_all();
+        auto self = std::this_thread::get_id();
         for (auto& w : _workers)
-            if (w.joinable()) w.join();
+            if (w.joinable() && w.get_id() != self) w.join();
     }
 
     static void _enqueue(std::function<void()> task) { _pool.enqueue(std::move(task)); }
